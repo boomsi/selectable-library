@@ -74,6 +74,21 @@ class SelectableTextView(context: Context) : ReactTextView(context) {
             }
           })
 
+  // selectionDismissDetector 在有选区时检测 tap（非滚动），用于点击其他地方清空选区。
+  // 滚动时 ScrollView 的 onInterceptTouchEvent 会拦截，TextView 收到 ACTION_CANCEL，
+  // 不会触发 onSingleTapUp，选区保持。
+  private val selectionDismissDetector =
+      GestureDetector(
+          context,
+          object : GestureDetector.SimpleOnGestureListener() {
+            override fun onDown(event: MotionEvent): Boolean = true
+
+            override fun onSingleTapUp(event: MotionEvent): Boolean {
+              clearSelection()
+              return true
+            }
+          })
+
   // selectionActionModeCallback 统一处理系统菜单保留策略、自定义菜单、菜单定位和 JS 回调。
   private val selectionActionModeCallback =
       object : ActionMode.Callback2() {
@@ -155,9 +170,14 @@ class SelectableTextView(context: Context) : ReactTextView(context) {
       return true
     }
 
-    // 当前文本已经有选区时，后续拖动通常是选择手柄移动，不应被 ScrollView 抢走。
+    // 有选区时用 selectionDismissDetector 区分 tap 和 scroll：
+    // - tap（点击其他地方）→ clearSelection，和 iOS 行为一致
+    // - scroll → ScrollView 的 onInterceptTouchEvent 拦截，TextView 收 ACTION_CANCEL，选区保持
+    // 不调 super.onTouchEvent，避免 TextView 在 ACTION_UP 销毁 ActionMode
+    // 手柄拖动由系统手柄 popup 独立处理，不经过 onTouchEvent，不受影响
     if (hasInteractiveSelection()) {
-      parent?.requestDisallowInterceptTouchEvent(true)
+      selectionDismissDetector.onTouchEvent(event)
+      return true
     }
 
     val handled = super.onTouchEvent(event)
