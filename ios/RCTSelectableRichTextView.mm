@@ -1,17 +1,16 @@
-#import "RCTSelectableTextView.h"
+#import "RCTSelectableRichTextView.h"
 
 #import <React/RCTTextAttributes.h>
 #import <React/UIView+React.h>
 
 // 记录当前交互中的 SelectableText，用于切换文本块时清理上一个 UITextView 保留的 selectedRange。
-static __weak RCTSelectableTextView *RCTActiveSelectableTextView = nil;
+static __weak RCTSelectableRichTextView *RCTActiveSelectableRichTextView = nil;
 
-@interface RCTSelectableTextView () <UITextViewDelegate, UIEditMenuInteractionDelegate>
+@interface RCTSelectableRichTextView () <UITextViewDelegate, UIEditMenuInteractionDelegate>
 
 @end
 
-@implementation RCTSelectableTextView {
-  NSArray<UIView *> *_Nullable _descendantViews;
+@implementation RCTSelectableRichTextView {
   BOOL _rnSelectable;
   UILongPressGestureRecognizer *_paragraphLongPressGestureRecognizer;
   UIEditMenuInteraction *_selectionEditMenuInteraction API_AVAILABLE(ios(16.0));
@@ -66,14 +65,14 @@ static __weak RCTSelectableTextView *RCTActiveSelectableTextView = nil;
 // 当前 SelectableText 开始交互时，清理上一个实例残留的选区，避免再次点击旧位置恢复旧选区。
 - (void)markAsActiveSelectableTextView
 {
-  RCTSelectableTextView *previousActiveTextView = RCTActiveSelectableTextView;
+  RCTSelectableRichTextView *previousActiveTextView = RCTActiveSelectableRichTextView;
 
   // 只有切换到另一个实例时才清理，避免影响当前实例内的长按和手柄拖动。
   if (previousActiveTextView != nil && previousActiveTextView != self) {
     [previousActiveTextView clearTextSelection];
   }
 
-  RCTActiveSelectableTextView = self;
+  RCTActiveSelectableRichTextView = self;
 }
 
 // 清空 UITextView 内部保留的 selectedRange，防止失焦后再次触摸时恢复旧选区。
@@ -130,10 +129,10 @@ static __weak RCTSelectableTextView *RCTActiveSelectableTextView = nil;
 {
   _collapsedSelectionResetToken++;
   NSUInteger resetToken = _collapsedSelectionResetToken;
-  __weak RCTSelectableTextView *weakSelf = self;
+  __weak RCTSelectableRichTextView *weakSelf = self;
 
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-    RCTSelectableTextView *strongSelf = weakSelf;
+    RCTSelectableRichTextView *strongSelf = weakSelf;
 
     // 视图已释放时不再执行延迟恢复。
     if (strongSelf == nil) {
@@ -382,7 +381,7 @@ static __weak RCTSelectableTextView *RCTActiveSelectableTextView = nil;
 - (NSArray<UIMenuElement *> *)customMenuActionsForSelectedRange:(NSRange)range API_AVAILABLE(ios(16.0))
 {
   NSMutableArray<UIMenuElement *> *actions = [NSMutableArray new];
-  __weak RCTSelectableTextView *weakSelf = self;
+  __weak RCTSelectableRichTextView *weakSelf = self;
 
   for (NSDictionary *item in self.menuItems) {
     NSString *itemId = [item[@"id"] isKindOfClass:[NSString class]] ? item[@"id"] : nil;
@@ -482,40 +481,12 @@ static __weak RCTSelectableTextView *RCTActiveSelectableTextView = nil;
 }
 
 - (void)setTextStorage:(NSTextStorage *)textStorage
-          contentFrame:(CGRect)contentFrame
-       descendantViews:(NSArray<UIView *> *)descendantViews
 {
-  // 移除旧的 descendant views
-  for (UIView *view in _descendantViews) {
-    [view removeFromSuperview];
-  }
-
-  _descendantViews = descendantViews;
-
   // 用 attributedText 设置，UITextView 会自行构建内部 TextKit 管线
   self.attributedText = textStorage;
 
-  // 添加 descendant views（内嵌的非文本子 View）
-  for (UIView *view in descendantViews) {
-    [self addSubview:view];
-  }
-
   // 确保 layoutManager 的 usesFontLeading 与 ShadowView 测量一致
   self.layoutManager.usesFontLeading = NO;
-}
-
-- (void)reactSetFrame:(CGRect)frame
-{
-  [UIView performWithoutAnimation:^{
-    [super reactSetFrame:frame];
-  }];
-}
-
-#pragma mark - React 子视图管理
-
-- (void)didUpdateReactSubviews
-{
-  // 不做处理，子视图由 setTextStorage 方法管理
 }
 
 #pragma mark - Accessibility

@@ -1,8 +1,9 @@
-export { default as SelectableText } from './SelectableText';
+export { default as SelectableRichText } from './SelectableRichText';
 export type {
-  SelectableTextLongPressEvent,
-  SelectableTextMenuActionEvent,
-  SelectableTextMenuItem,
-  SelectableTextRef,
-  SelectableTextSelectionMode,
-} from './SelectableText';
+  SelectableRichTextLongPressEvent,
+  SelectableRichTextMenuActionEvent,
+  SelectableRichTextMenuItem,
+  SelectableRichTextProps,
+  SelectableRichTextRef,
+  SelectableRichTextSelectionMode,
+} from './types';

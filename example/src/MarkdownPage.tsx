@@ -1,27 +1,27 @@
 import React from 'react';
-import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import {
-  SelectableText as SelectableTextBase,
-  type SelectableTextLongPressEvent,
-  type SelectableTextMenuActionEvent,
-  type SelectableTextMenuItem,
-  type SelectableTextRef,
+  SelectableRichText as SelectableRichTextBase,
+  type SelectableRichTextLongPressEvent,
+  type SelectableRichTextMenuActionEvent,
+  type SelectableRichTextMenuItem,
+  type SelectableRichTextRef,
 } from '@boomsi/react-native-selectable-text';
 
 // React 19 + RN 0.85 下 ForwardRefExoticComponent 与 JSX 类型不兼容，手动定义 props + cast
-interface SelectableTextProps {
+interface SelectableRichTextProps {
   selectable?: boolean;
   style?: object;
   children?: React.ReactNode;
   selectionMode?: 'default' | 'menuThenParagraph';
-  onTextLongPress?: (e: {nativeEvent: SelectableTextLongPressEvent}) => void;
-  menuItems?: SelectableTextMenuItem[];
+  onTextLongPress?: (e: { nativeEvent: SelectableRichTextLongPressEvent }) => void;
+  menuItems?: SelectableRichTextMenuItem[];
   showSystemMenuItems?: boolean;
   clearSelectionOnMenuAction?: boolean;
-  onMenuAction?: (e: {nativeEvent: SelectableTextMenuActionEvent}) => void;
+  onMenuAction?: (e: { nativeEvent: SelectableRichTextMenuActionEvent }) => void;
 }
-const SelectableText = SelectableTextBase as unknown as React.FC<
-  SelectableTextProps & {ref?: React.Ref<SelectableTextRef>}
+const SelectableRichText = SelectableRichTextBase as unknown as React.FC<
+  SelectableRichTextProps & { ref?: React.Ref<SelectableRichTextRef> }
 >;
 
 interface TextSegment {
@@ -48,14 +48,14 @@ const mockData: ContentBlock[] = [
   {
     type: 'paragraph',
     segments: [
-      {text: 'React Native 的 '},
-      {text: 'Text', bold: true},
-      {text: ' 组件从早期版本就内置了 '},
-      {text: 'selectable', bold: true, italic: true},
-      {text: ' 属性。当该属性设置为 '},
-      {text: 'true', italic: true},
-      {text: ' 时，用户可以通过 '},
-      {text: '长按', bold: true},
+      { text: 'React Native 的 ' },
+      { text: 'Text', bold: true },
+      { text: ' 组件从早期版本就内置了 ' },
+      { text: 'selectable', bold: true, italic: true },
+      { text: ' 属性。当该属性设置为 ' },
+      { text: 'true', italic: true },
+      { text: ' 时，用户可以通过 ' },
+      { text: '长按', bold: true },
       {
         text: ' 文本来触发系统原生的文本选取能力。iOS 端会弹出系统选取菜单（复制、全选等），Android 端同样支持选取和复制操作。',
       },
@@ -68,13 +68,13 @@ const mockData: ContentBlock[] = [
   {
     type: 'paragraph',
     segments: [
-      {text: '在底层，React Native 将 '},
-      {text: 'selectable', italic: true},
-      {text: ' 映射到 iOS 的 '},
-      {text: 'UITextView.selectable', bold: true},
-      {text: ' 和 Android 的 '},
-      {text: 'TextView.setTextIsSelectable()', bold: true},
-      {text: '。整个映射过程对开发者透明，只需声明式地设置属性即可。'},
+      { text: '在底层，React Native 将 ' },
+      { text: 'selectable', italic: true },
+      { text: ' 映射到 iOS 的 ' },
+      { text: 'UITextView.selectable', bold: true },
+      { text: ' 和 Android 的 ' },
+      { text: 'TextView.setTextIsSelectable()', bold: true },
+      { text: '。整个映射过程对开发者透明，只需声明式地设置属性即可。' },
     ],
   },
   {
@@ -84,19 +84,19 @@ const mockData: ContentBlock[] = [
   {
     type: 'paragraph',
     segments: [
-      {text: 'React Native 的 Text 组件支持嵌套。'},
-      {text: '父级 Text', bold: true},
-      {text: ' 设置 '},
-      {text: 'selectable={true}', italic: true},
-      {text: ' 后，'},
-      {text: '所有嵌套的子 Text', bold: true},
-      {text: ' 内容均可被选中和复制。这意味着我们可以在一个段落中混合使用 '},
-      {text: '粗体', bold: true},
-      {text: '、'},
-      {text: '斜体', italic: true},
-      {text: '、'},
-      {text: '粗斜体', bold: true, italic: true},
-      {text: ' 等多种样式，而文本选取功能依然正常工作。'},
+      { text: 'React Native 的 Text 组件支持嵌套。' },
+      { text: '父级 Text', bold: true },
+      { text: ' 设置 ' },
+      { text: 'selectable={true}', italic: true },
+      { text: ' 后，' },
+      { text: '所有嵌套的子 Text', bold: true },
+      { text: ' 内容均可被选中和复制。这意味着我们可以在一个段落中混合使用 ' },
+      { text: '粗体', bold: true },
+      { text: '、' },
+      { text: '斜体', italic: true },
+      { text: '、' },
+      { text: '粗斜体', bold: true, italic: true },
+      { text: ' 等多种样式，而文本选取功能依然正常工作。' },
     ],
   },
   {
@@ -106,10 +106,12 @@ const mockData: ContentBlock[] = [
   {
     type: 'paragraph',
     segments: [
-      {text: '下面是一段模拟 Markdown 渲染的富文本内容。'},
-      {text: '这段文字完全由嵌套的 Text 组件拼接而成，', bold: true},
-      {text: '但对外表现为一个完整可选中的文本块', italic: true},
-      {text: '。用户长按任意位置即可触发文本选取，然后拖动选取手柄调整范围。'},
+      { text: '下面是一段模拟 Markdown 渲染的富文本内容。' },
+      { text: '这段文字完全由嵌套的 Text 组件拼接而成，', bold: true },
+      { text: '但对外表现为一个完整可选中的文本块', italic: true },
+      {
+        text: '。用户长按任意位置即可触发文本选取，然后拖动选取手柄调整范围。',
+      },
     ],
   },
   {
@@ -119,7 +121,7 @@ const mockData: ContentBlock[] = [
   {
     type: 'paragraph',
     segments: [
-      {text: '1. ', bold: true},
+      { text: '1. ', bold: true },
       {
         text: '每个文本块（标题/段落）应作为独立的 selectable Text 组件。不要将整个页面包在一个 selectable Text 中，否则会导致不同层级的文本被不恰当地合并选取。',
       },
@@ -128,7 +130,7 @@ const mockData: ContentBlock[] = [
   {
     type: 'paragraph',
     segments: [
-      {text: '2. ', bold: true},
+      { text: '2. ', bold: true },
       {
         text: '在 ScrollView 中使用 selectable Text 时，需要注意手势冲突。React Native 内部已处理了大部分情况，但在极端场景下可能需要手动调整。',
       },
@@ -137,16 +139,16 @@ const mockData: ContentBlock[] = [
   {
     type: 'paragraph',
     segments: [
-      {text: '3. ', bold: true},
-      {text: '嵌套 Text 的样式继承：子 Text 会继承父 Text 的默认样式（如 '},
-      {text: 'fontSize', italic: true},
-      {text: '、'},
-      {text: 'color', italic: true},
-      {text: ' 等），但 '},
-      {text: 'fontWeight', bold: true},
-      {text: ' 和 '},
-      {text: 'fontStyle', bold: true},
-      {text: ' 需要显式设置以覆盖。'},
+      { text: '3. ', bold: true },
+      { text: '嵌套 Text 的样式继承：子 Text 会继承父 Text 的默认样式（如 ' },
+      { text: 'fontSize', italic: true },
+      { text: '、' },
+      { text: 'color', italic: true },
+      { text: ' 等），但 ' },
+      { text: 'fontWeight', bold: true },
+      { text: ' 和 ' },
+      { text: 'fontStyle', bold: true },
+      { text: ' 需要显式设置以覆盖。' },
     ],
   },
   {
@@ -156,8 +158,8 @@ const mockData: ContentBlock[] = [
   {
     type: 'paragraph',
     segments: [
-      {text: 'React Native 的文本选取是一个开箱即用的功能，通过简单的 '},
-      {text: 'selectable', bold: true, italic: true},
+      { text: 'React Native 的文本选取是一个开箱即用的功能，通过简单的 ' },
+      { text: 'selectable', bold: true, italic: true },
       {
         text: ' 属性即可实现。配合嵌套 Text 组件，可以在保持富文本样式的同时，提供与原生应用一致的文本选取体验。这使得 React Native 非常适合构建内容展示类应用，如新闻阅读器、文档浏览器、笔记应用等。',
       },
@@ -169,13 +171,13 @@ const mockData: ContentBlock[] = [
 const BLOCK_SEPARATOR = '\n\n';
 
 // iOS 选中文本后的原生菜单项，点击"选取文本"进入选区后展示。
-const SELECTABLE_TEXT_MENU_ITEMS: SelectableTextMenuItem[] = [
-  {id: 'quote', title: '引用'},
-  {id: 'explain', title: '解释'},
+const SELECTABLE_TEXT_MENU_ITEMS: SelectableRichTextMenuItem[] = [
+  { id: 'quote', title: '引用' },
+  { id: 'explain', title: '解释' },
 ];
 
 interface ParagraphMenuState {
-  targetRef: React.RefObject<SelectableTextRef | null>;
+  targetRef: React.RefObject<SelectableRichTextRef | null>;
   paragraphText: string;
   selectionStart: number;
   selectionEnd: number;
@@ -186,25 +188,25 @@ interface ParagraphMenuState {
 function MarkdownPage(): React.JSX.Element {
   const children: React.ReactNode[] = [];
 
-  const firstTextRef = React.useRef<SelectableTextRef>(null);
-  const secondTextRef = React.useRef<SelectableTextRef>(null);
-  const documentTextRef = React.useRef<SelectableTextRef>(null);
+  const firstTextRef = React.useRef<SelectableRichTextRef>(null);
+  const secondTextRef = React.useRef<SelectableRichTextRef>(null);
+  const documentTextRef = React.useRef<SelectableRichTextRef>(null);
   const [paragraphMenu, setParagraphMenu] =
     React.useState<ParagraphMenuState | null>(null);
   const [activeParagraphRef, setActiveParagraphRef] =
-    React.useState<React.RefObject<SelectableTextRef | null> | null>(null);
+    React.useState<React.RefObject<SelectableRichTextRef | null> | null>(null);
 
   const handleSelectionMenuAction = ({
     nativeEvent,
   }: {
-    nativeEvent: SelectableTextMenuActionEvent;
+    nativeEvent: SelectableRichTextMenuActionEvent;
   }) => {
-    console.log('[SelectableText] selection menu action:', nativeEvent);
+    console.log('[SelectableRichText] selection menu action:', nativeEvent);
   };
 
   const handleTextLongPress =
-    (targetRef: React.RefObject<SelectableTextRef | null>) =>
-    ({nativeEvent}: {nativeEvent: SelectableTextLongPressEvent}) => {
+    (targetRef: React.RefObject<SelectableRichTextRef | null>) =>
+    ({ nativeEvent }: { nativeEvent: SelectableRichTextLongPressEvent }) => {
       if (activeParagraphRef) {
         activeParagraphRef.current?.clearSelection();
         setActiveParagraphRef(null);
@@ -227,7 +229,7 @@ function MarkdownPage(): React.JSX.Element {
 
     paragraphMenu.targetRef.current?.selectRange(
       paragraphMenu.selectionStart,
-      paragraphMenu.selectionEnd,
+      paragraphMenu.selectionEnd
     );
     setActiveParagraphRef(paragraphMenu.targetRef);
     setParagraphMenu(null);
@@ -240,7 +242,7 @@ function MarkdownPage(): React.JSX.Element {
 
     paragraphMenu.targetRef.current?.copyRange(
       paragraphMenu.selectionStart,
-      paragraphMenu.selectionEnd,
+      paragraphMenu.selectionEnd
     );
     paragraphMenu.targetRef.current?.clearSelection();
     setActiveParagraphRef(null);
@@ -264,21 +266,21 @@ function MarkdownPage(): React.JSX.Element {
         children.push(
           <Text key={index} style={styles.h1}>
             {block.text}
-          </Text>,
+          </Text>
         );
         break;
       case 'h2':
         children.push(
           <Text key={index} style={styles.h2}>
             {block.text}
-          </Text>,
+          </Text>
         );
         break;
       case 'h3':
         children.push(
           <Text key={index} style={styles.h3}>
             {block.text}
-          </Text>,
+          </Text>
         );
         break;
       case 'paragraph':
@@ -295,7 +297,7 @@ function MarkdownPage(): React.JSX.Element {
                 </Text>
               );
             })}
-          </Text>,
+          </Text>
         );
         break;
     }
@@ -307,7 +309,8 @@ function MarkdownPage(): React.JSX.Element {
         style={styles.scrollView}
         contentContainerStyle={styles.contentContainer}
         canCancelContentTouches={true}
-        keyboardShouldPersistTaps="handled">
+        keyboardShouldPersistTaps="handled"
+      >
         <View
           style={{
             backgroundColor: '#38f',
@@ -315,8 +318,9 @@ function MarkdownPage(): React.JSX.Element {
             marginBottom: 20,
             maxWidth: '100%',
             borderRadius: 8,
-          }}>
-          <SelectableText
+          }}
+        >
+          <SelectableRichText
             ref={firstTextRef}
             selectable={true}
             style={[styles.document]}
@@ -325,13 +329,14 @@ function MarkdownPage(): React.JSX.Element {
             clearSelectionOnMenuAction={true}
             selectionMode="menuThenParagraph"
             onMenuAction={handleSelectionMenuAction}
-            onTextLongPress={handleTextLongPress(firstTextRef)}>
+            onTextLongPress={handleTextLongPress(firstTextRef)}
+          >
             <Text>这是 Text</Text>
             <Text>{'\n'}这是 Text 内的 Text</Text>
-          </SelectableText>
+          </SelectableRichText>
         </View>
 
-        <SelectableText
+        <SelectableRichText
           ref={secondTextRef}
           selectable={true}
           style={styles.document}
@@ -340,14 +345,15 @@ function MarkdownPage(): React.JSX.Element {
           clearSelectionOnMenuAction={true}
           selectionMode="menuThenParagraph"
           onMenuAction={handleSelectionMenuAction}
-          onTextLongPress={handleTextLongPress(secondTextRef)}>
+          onTextLongPress={handleTextLongPress(secondTextRef)}
+        >
           <Text>123</Text>
           <Text>123</Text>
           <Text>123</Text>
           <Text>123</Text>
           <Text>123dmsajndoa</Text>
-        </SelectableText>
-        <SelectableText
+        </SelectableRichText>
+        <SelectableRichText
           ref={documentTextRef}
           selectable={true}
           style={styles.document}
@@ -356,14 +362,16 @@ function MarkdownPage(): React.JSX.Element {
           clearSelectionOnMenuAction={true}
           selectionMode="menuThenParagraph"
           onMenuAction={handleSelectionMenuAction}
-          onTextLongPress={handleTextLongPress(documentTextRef)}>
+          onTextLongPress={handleTextLongPress(documentTextRef)}
+        >
           {children}
-        </SelectableText>
+        </SelectableRichText>
       </ScrollView>
       {paragraphMenu && (
         <Pressable
           style={styles.menuDismissLayer}
-          onPress={handleDismissParagraphMenu}>
+          onPress={handleDismissParagraphMenu}
+        >
           <View
             style={[
               styles.paragraphMenu,
@@ -371,21 +379,24 @@ function MarkdownPage(): React.JSX.Element {
                 left: Math.max(12, paragraphMenu.pageX - 24),
                 top: paragraphMenu.pageY + 10,
               },
-            ]}>
+            ]}
+          >
             <Pressable
               style={styles.paragraphMenuItem}
-              onPress={event => {
+              onPress={(event) => {
                 event.stopPropagation();
                 handleSelectParagraph();
-              }}>
+              }}
+            >
               <Text style={styles.paragraphMenuItemText}>选取文本</Text>
             </Pressable>
             <Pressable
               style={styles.paragraphMenuItem}
-              onPress={event => {
+              onPress={(event) => {
                 event.stopPropagation();
                 handleCopyParagraph();
-              }}>
+              }}
+            >
               <Text style={styles.paragraphMenuItemText}>复制</Text>
             </Pressable>
           </View>
@@ -445,7 +456,7 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   menuDismissLayer: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     zIndex: 10,
   },
   paragraphMenu: {

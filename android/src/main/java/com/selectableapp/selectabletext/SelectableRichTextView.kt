@@ -18,20 +18,20 @@ import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReactContext
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.uimanager.PixelUtil
-import com.facebook.react.uimanager.events.RCTEventEmitter
+import com.facebook.react.uimanager.UIManagerHelper
 import com.facebook.react.views.text.ReactTextView
 import java.lang.ref.WeakReference
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-// SelectableTextMenuItem 保存 JS 传入的 ActionMode 自定义菜单项。
-data class SelectableTextMenuItem(val id: String, val title: String)
+// SelectableRichTextMenuItem 保存 JS 传入的 ActionMode 自定义菜单项。
+data class SelectableRichTextMenuItem(val id: String, val title: String)
 
-// SelectableTextView 在 RN ReactTextView 基础上接入 Android 原生文本选区和菜单能力。
-class SelectableTextView(context: Context) : ReactTextView(context) {
+// SelectableRichTextView 在 RN ReactTextView 基础上接入 Android 原生文本选区和菜单能力。
+class SelectableRichTextView(context: Context) : ReactTextView(context) {
   // menuItems 是 JS 侧传入的自定义选中文本菜单配置。
-  var menuItems: List<SelectableTextMenuItem> = emptyList()
+  var menuItems: List<SelectableRichTextMenuItem> = emptyList()
     set(value) {
       field = value
       invalidateActionMode()
@@ -105,7 +105,7 @@ class SelectableTextView(context: Context) : ReactTextView(context) {
           return true
         }
 
-        // onActionItemClicked 只消费 SelectableText 自定义菜单项，系统菜单继续交给 TextView 默认逻辑。
+        // onActionItemClicked 只消费 SelectableRichText 自定义菜单项，系统菜单继续交给 TextView 默认逻辑。
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
           val customItem = customMenuItemForMenuId(item.itemId)
 
@@ -131,14 +131,14 @@ class SelectableTextView(context: Context) : ReactTextView(context) {
           restoreMenuThenParagraphTouchStateAfterActionMode()
         }
 
-        // onGetContentRect 把浮动菜单锚点绑定到当前选区首行，而不是整个 SelectableText 视图。
+        // onGetContentRect 把浮动菜单锚点绑定到当前选区首行，而不是整个 SelectableRichText 视图。
         override fun onGetContentRect(mode: ActionMode, view: android.view.View, outRect: Rect) {
           selectedTextContentRect(outRect)
         }
       }
 
   init {
-    // ReactTextView 默认 selectable=false，这里默认开启以匹配 SelectableText 的组件语义。
+    // ReactTextView 默认 selectable=false，这里默认开启以匹配 SelectableRichText 的组件语义。
     setTextIsSelectable(true)
     setCustomSelectionActionModeCallback(selectionActionModeCallback)
   }
@@ -149,11 +149,11 @@ class SelectableTextView(context: Context) : ReactTextView(context) {
     updateNativeSelectableState()
   }
 
-  // onTouchEvent 在不同 SelectableText 之间切换时清理旧选区，并在拖动手柄时保护父级手势。
+  // onTouchEvent 在不同 SelectableRichText 之间切换时清理旧选区，并在拖动手柄时保护父级手势。
   override fun onTouchEvent(event: MotionEvent): Boolean {
     // ACTION_DOWN 表示用户开始和当前文本块交互，需要清掉上一个文本块的残留选区。
     if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-      markAsActiveSelectableTextView()
+      markAsActiveSelectableRichTextView()
     }
 
     // menuThenParagraph 未选中时长按只弹 RN 菜单；已有选区时交还 TextView 处理手柄拖动。
@@ -199,7 +199,7 @@ class SelectableTextView(context: Context) : ReactTextView(context) {
 
     // 只有真实选中文本时才标记 active，避免普通点击插入点状态影响其他文本块。
     if (selStart >= 0 && selEnd >= 0 && selStart != selEnd) {
-      markAsActiveSelectableTextView()
+      markAsActiveSelectableRichTextView()
       parent?.requestDisallowInterceptTouchEvent(true)
     }
   }
@@ -230,7 +230,7 @@ class SelectableTextView(context: Context) : ReactTextView(context) {
 
   // selectRange 根据 JS 菜单命令临时开启原生选择能力，并设置指定段落选区。
   fun selectRange(start: Int, end: Int) {
-    markAsActiveSelectableTextView()
+    markAsActiveSelectableRichTextView()
     super.setTextIsSelectable(true)
 
     val selectableText = ensureSpannableText()
@@ -281,10 +281,10 @@ class SelectableTextView(context: Context) : ReactTextView(context) {
   }
 
   // customMenuItemForMenuId 把 Android menu itemId 映射回 JS 传入的菜单项。
-  private fun customMenuItemForMenuId(menuItemId: Int): SelectableTextMenuItem? {
+  private fun customMenuItemForMenuId(menuItemId: Int): SelectableRichTextMenuItem? {
     val index = menuItemId - CUSTOM_MENU_ITEM_ID_OFFSET
 
-    // index 越界说明该菜单项不是 SelectableText 自定义菜单。
+    // index 越界说明该菜单项不是 SelectableRichText 自定义菜单。
     if (index < 0 || index >= menuItems.size) {
       return null
     }
@@ -293,7 +293,7 @@ class SelectableTextView(context: Context) : ReactTextView(context) {
   }
 
   // emitMenuAction 把当前选区和菜单动作回调给 JS onMenuAction。
-  private fun emitMenuAction(item: SelectableTextMenuItem) {
+  private fun emitMenuAction(item: SelectableRichTextMenuItem) {
     val selectionStart = Selection.getSelectionStart(text)
     val selectionEnd = Selection.getSelectionEnd(text)
     val normalizedStart = min(selectionStart, selectionEnd)
@@ -385,7 +385,7 @@ class SelectableTextView(context: Context) : ReactTextView(context) {
       return
     }
 
-    markAsActiveSelectableTextView()
+    markAsActiveSelectableRichTextView()
 
     val paragraphRange = paragraphRangeAtPoint(event.x, event.y)
 
@@ -490,13 +490,28 @@ class SelectableTextView(context: Context) : ReactTextView(context) {
     return start to end
   }
 
-  // emitDirectEvent 通过 RN 旧架构事件通道发送 SelectableText 的 direct event。
+  // emitDirectEvent 通过 Fabric EventDispatcher 发送 SelectableRichText 的 direct event。
   private fun emitDirectEvent(eventName: String, eventPayload: WritableMap) {
-    // 只有 ReactContext 才能发送 RN 旧架构 direct event。
-    if (context is ReactContext) {
-      (context as ReactContext)
-          .getJSModule(RCTEventEmitter::class.java)
-          .receiveEvent(id, eventName, eventPayload)
+    val reactContext = context as? ReactContext
+
+    // 只有 ReactContext 才能取得 RN EventDispatcher。
+    if (reactContext == null) {
+      return
+    }
+
+    val eventDispatcher = UIManagerHelper.getEventDispatcherForReactTag(reactContext, id)
+
+    // EventDispatcher 为空时说明 React instance 已不可用，不能继续派发事件。
+    if (eventDispatcher == null) {
+      return
+    }
+
+    val surfaceId = UIManagerHelper.getSurfaceId(this)
+
+    when (eventName) {
+      EVENT_MENU_ACTION -> eventDispatcher.dispatchEvent(SelectableRichTextMenuActionEvent(surfaceId, id, eventPayload))
+      EVENT_TEXT_LONG_PRESS ->
+          eventDispatcher.dispatchEvent(SelectableRichTextLongPressEvent(surfaceId, id, eventPayload))
     }
   }
 
@@ -510,11 +525,11 @@ class SelectableTextView(context: Context) : ReactTextView(context) {
   // hasInteractiveSelection 判断当前非空选区是否仍处在系统 ActionMode 交互生命周期里。
   private fun hasInteractiveSelection(): Boolean = currentActionMode != null && hasActiveSelection()
 
-  // markAsActiveSelectableTextView 清理上一个 SelectableText 的残留选区。
-  private fun markAsActiveSelectableTextView() {
+  // markAsActiveSelectableRichTextView 清理上一个 SelectableRichText 的残留选区。
+  private fun markAsActiveSelectableRichTextView() {
     val previousActiveTextView = activeTextView?.get()
 
-    // 只有切换到另一个 SelectableText 实例时才清理，避免干扰当前实例内的手柄拖动。
+    // 只有切换到另一个 SelectableRichText 实例时才清理，避免干扰当前实例内的手柄拖动。
     if (previousActiveTextView != null && previousActiveTextView !== this) {
       previousActiveTextView.clearSelection()
     }
@@ -524,10 +539,10 @@ class SelectableTextView(context: Context) : ReactTextView(context) {
 
   companion object {
     // EVENT_MENU_ACTION 是 Android 发送给 JS onMenuAction 的 direct event 名。
-    const val EVENT_MENU_ACTION = "topMenuAction"
+    const val EVENT_MENU_ACTION = SelectableRichTextMenuActionEvent.EVENT_NAME
 
     // EVENT_TEXT_LONG_PRESS 是 Android 命中段落后发送给 JS RN 菜单的 direct event 名。
-    const val EVENT_TEXT_LONG_PRESS = "topTextLongPress"
+    const val EVENT_TEXT_LONG_PRESS = SelectableRichTextLongPressEvent.EVENT_NAME
 
     // SELECTION_MODE_DEFAULT 是 Android 当前实现的原生长按选区模式。
     const val SELECTION_MODE_DEFAULT = "default"
@@ -536,16 +551,16 @@ class SelectableTextView(context: Context) : ReactTextView(context) {
     private const val SELECTION_MODE_MENU_THEN_PARAGRAPH = "menuThenParagraph"
 
     // CLIP_LABEL 是写入 Android 剪贴板时使用的来源标签。
-    private const val CLIP_LABEL = "SelectableText"
+    private const val CLIP_LABEL = "SelectableRichText"
 
-    // CUSTOM_MENU_GROUP_ID 用于批量移除 SelectableText 自定义菜单项。
+    // CUSTOM_MENU_GROUP_ID 用于批量移除 SelectableRichText 自定义菜单项。
     private const val CUSTOM_MENU_GROUP_ID = 0x53454c
 
     // CUSTOM_MENU_ITEM_ID_OFFSET 给自定义菜单生成不易和系统项冲突的 itemId。
     private const val CUSTOM_MENU_ITEM_ID_OFFSET = 0x53454c00
 
     // activeTextView 记录当前交互文本块，切换块时清理上一个 Android Selection。
-    private var activeTextView: WeakReference<SelectableTextView>? = null
+    private var activeTextView: WeakReference<SelectableRichTextView>? = null
 
     // clampedRange 把 JS 或菜单传入的选区范围裁剪到当前文本长度内。
     fun clampedRange(start: Int, end: Int, textLength: Int): Pair<Int, Int>? {

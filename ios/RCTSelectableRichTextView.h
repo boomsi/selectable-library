@@ -4,7 +4,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface RCTSelectableTextView : UITextView
+@interface RCTSelectableRichTextView : UITextView
 
 @property (nonatomic, assign, getter=isSelectable) BOOL selectable;
 @property (nonatomic, copy, nullable) NSArray<NSDictionary *> *menuItems;
@@ -14,9 +14,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy, nullable) NSString *selectionMode;
 @property (nonatomic, copy, nullable) RCTDirectEventBlock onTextLongPress;
 
-- (void)setTextStorage:(NSTextStorage *)textStorage
-          contentFrame:(CGRect)contentFrame
-       descendantViews:(NSArray<UIView *> *)descendantViews;
+// setTextStorage 把 Fabric Paragraph state 转换得到的 NSTextStorage 设置到 UITextView，
+// 是 RCTSelectableRichTextComponentView 唯一的文本内容入口。
+- (void)setTextStorage:(NSTextStorage *)textStorage;
 
 - (void)selectTextRangeWithStart:(NSInteger)start end:(NSInteger)end;
 - (void)clearTextSelection;
